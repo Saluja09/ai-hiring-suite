@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.db import init_db
-from app.routers import stream, webhooks
+from app.routers import agents, calls, stream, webhooks
 
 app = FastAPI(title="AI Hiring Suite")
 app.add_middleware(
@@ -15,6 +15,8 @@ app.add_middleware(
 
 app.include_router(webhooks.router)
 app.include_router(stream.router)
+app.include_router(agents.router)
+app.include_router(calls.router)
 
 
 @app.on_event("startup")
