@@ -42,6 +42,9 @@ async def create_agent(
 
     agent_id = response.get("id") or response.get("agent_id")
 
+    if not agent_id:
+        raise HTTPException(status_code=502, detail="Hunar agent response missing id")
+
     with Session(engine) as session:
         campaign = Campaign(
             name=body.campaign_name or body.name,

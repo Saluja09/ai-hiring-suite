@@ -94,6 +94,16 @@ async def create_calls(
             status = created.get("status")
             name, phone, custom_data = normalized[idx] if idx < len(normalized) else (None, None, {})
 
+            if not call_id:
+                result.append(
+                    {
+                        "mobile_number": created.get("mobile_number", phone),
+                        "status": status,
+                        "error": "missing call id",
+                    }
+                )
+                continue
+
             candidate = Candidate(
                 campaign_id=campaign_id,
                 name=name or "",
