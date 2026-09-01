@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Ravi Kumar",
+    "title": "Delivery Rider",
+    "company": "Swiggy",
+    "location": "Bangalore",
+    "phone": "+919845012345",
+    "linkedin": null
+  },
+  {
+    "name": "Suresh Yadav",
+    "title": "Delivery Executive",
+    "company": "Zomato",
+    "location": "Bangalore",
+    "phone": "+919845098765",
+    "linkedin": "https://linkedin.com/in/sureshyadav"
+  },
+  {
+    "name": "Amit Sharma",
+    "title": "Warehouse Associate",
+    "company": "Amazon",
+    "location": "Mumbai",
+    "phone": "+919920011223",
+    "linkedin": null
+  },
+  {
+    "name": "Priya Nair",
+    "title": "Retail Store Associate",
+    "company": "Reliance Trends",
+    "location": "Mumbai",
+    "phone": "+919920033445",
+    "linkedin": "https://linkedin.com/in/priyanair"
+  },
+  {
+    "name": "Deepak Verma",
+    "title": "Field Sales Executive",
+    "company": "HDFC Bank",
+    "location": "Delhi",
+    "phone": "+919811022334",
+    "linkedin": null
+  },
+  {
+    "name": "Sanjay Singh",
+    "title": "Security Guard",
+    "company": "G4S",
+    "location": "Delhi",
+    "phone": "+919811055667",
+    "linkedin": null
+  },
+  {
+    "name": "Mohammed Irfan",
+    "title": "Delivery Rider",
+    "company": "Dunzo",
+    "location": "Hyderabad",
+    "phone": "+919959011224",
+    "linkedin": "https://linkedin.com/in/mohammedirfan"
+  },
+  {
+    "name": "Lakshmi Reddy",
+    "title": "Warehouse Associate",
+    "company": "Flipkart",
+    "location": "Hyderabad",
+    "phone": "+919959044556",
+    "linkedin": null
+  },
+  {
+    "name": "Karthik Raja",
+    "title": "Cook",
+    "company": "Rebel Foods",
+    "location": "Chennai",
+    "phone": "+919841012233",
+    "linkedin": null
+  },
+  {
+    "name": "Divya Prakash",
+    "title": "Retail Store Associate",
+    "company": "Lifestyle",
+    "location": "Chennai",
+    "phone": "+919841055778",
+    "linkedin": "https://linkedin.com/in/divyaprakash"
+  },
+  {
+    "name": "Rahul Patil",
+    "title": "Field Sales Executive",
+    "company": "Bajaj Finserv",
+    "location": "Pune",
+    "phone": "+919922011335",
+    "linkedin": null
+  },
+  {
+    "name": "Snehal Joshi",
+    "title": "Delivery Rider",
+    "company": "Blinkit",
+    "location": "Pune",
+    "phone": "+919922066778",
+    "linkedin": null
+  },
+  {
+    "name": "Ankit Gupta",
+    "title": "Warehouse Associate",
+    "company": "BigBasket",
+    "location": "Gurgaon",
+    "phone": "+919871022446",
+    "linkedin": "https://linkedin.com/in/ankitgupta"
+  },
+  {
+    "name": "Farhan Ahmed",
+    "title": "Security Guard",
+    "company": "SIS India",
+    "location": "Kolkata",
+    "phone": "+919831011557",
+    "linkedin": null
+  },
+  {
+    "name": "Meena Kumari",
+    "title": "Cook",
+    "company": "Faasos",
+    "location": "Bangalore",
+    "phone": "+919845077889",
+    "linkedin": null
+  }
+]
