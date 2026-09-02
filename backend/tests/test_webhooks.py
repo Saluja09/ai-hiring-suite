@@ -1,6 +1,55 @@
 from app.config import get_settings
 
 
+def test_webhook_publishes_update_keyed_by_id(monkeypatch):
+    """Regression test: the SSE payload published on a webhook must carry the
+    call id under the key "id" (matching frontend CallRow.id), not only
+    "call_id" — otherwise the live dashboard never merges the update in.
+    """
+    monkeypatch.setenv("HUNAR_API_KEY", "")  # no keys -> skip signature
+    get_settings.cache_clear()
+    from app.main import app
+    from app.db import init_db
+
+    init_db()
+    from fastapi.testclient import TestClient
+
+    client = TestClient(app)
+    from app.db import engine
+    from sqlmodel import Session
+    from app.models import Call, Campaign
+    import app.routers.webhooks as webhooks_module
+
+    with Session(engine) as s:
+        c = Campaign(name="z", kind="hiring")
+        s.add(c)
+        s.commit()
+        s.refresh(c)
+        s.add(Call(id="call-id-key", campaign_id=c.id, status="IN_PROGRESS"))
+        s.commit()
+
+    published = {}
+
+    async def fake_publish(campaign_id, payload):
+        published["campaign_id"] = campaign_id
+        published["payload"] = payload
+
+    monkeypatch.setattr(webhooks_module, "publish", fake_publish)
+
+    r = client.post(
+        "/webhooks/hunar",
+        json={
+            "event_type": "call_result",
+            "call_id": "call-id-key",
+            "status": "COMPLETED",
+            "result": {"interested": True},
+        },
+    )
+    assert r.status_code == 200
+    assert "payload" in published
+    assert published["payload"]["id"] == "call-id-key"
+
+
 def test_webhook_updates_call_result(monkeypatch):
     monkeypatch.setenv("HUNAR_API_KEY", "")  # no keys -> skip signature
     get_settings.cache_clear()

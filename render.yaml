@@ -46,18 +46,18 @@ services:
         value: https://api.voice.hunar.ai/external/v1
 
       # --- This service's own public HTTPS URL, used to register webhook
-      # callbacks with Hunar. Render exposes this automatically; if it
-      # doesn't resolve for your plan, set it manually in the dashboard to
-      # https://<your-service-name>.onrender.com ---
+      # callbacks with Hunar. REQUIRED POST-DEPLOY STEP: set this manually in
+      # the Render dashboard (Environment tab) after the first deploy to the
+      # full https base URL, e.g.:
+      #   PUBLIC_BASE_URL=https://ai-hiring-suite-backend.onrender.com
+      # It must be a full "https://..." URL, not "host:port" — a malformed
+      # value here breaks the webhook callback URL registered with Hunar.
+      # If left unset, webhook callbacks won't be registered, but the app
+      # still degrades gracefully: the background reconciler polls Hunar
+      # directly for call results, so results still arrive (just not
+      # instantly via webhook).
       - key: PUBLIC_BASE_URL
-        fromService:
-          type: web
-          name: ai-hiring-suite-backend
-          property: hostport
-        # NOTE: `hostport` gives host:port, not a full https URL. If Render's
-        # blueprint sync doesn't produce a valid URL for your account/plan,
-        # just set PUBLIC_BASE_URL manually in the dashboard instead, e.g.
-        # PUBLIC_BASE_URL=https://ai-hiring-suite-backend.onrender.com
+        sync: false
 
       # --- LLM provider used for JD parsing/result summarization.
       # "none" disables LLM calls entirely (safe default, no key needed). ---

@@ -81,6 +81,7 @@ async def hunar_webhook(request: Request):
 
         campaign_id = call.campaign_id
         update = {
+            "id": call.id,
             "call_id": call.id,
             "campaign_id": call.campaign_id,
             "candidate_id": call.candidate_id,

@@ -65,6 +65,7 @@ async def reconcile_pending(session: Session, hunar_client) -> int:
         session.refresh(call)
 
         update = {
+            "id": call.id,
             "call_id": call.id,
             "campaign_id": call.campaign_id,
             "candidate_id": call.candidate_id,

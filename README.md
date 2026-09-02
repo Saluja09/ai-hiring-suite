@@ -120,7 +120,7 @@ This repo includes `render.yaml` (a [Render Blueprint](https://render.com/docs/b
 1. Push this repo to GitHub, then in Render: **New +** → **Blueprint**, point it at the repo.
 2. Render provisions the web service (root dir `backend`, `pip install -e .`, `uvicorn app.main:app --host 0.0.0.0 --port $PORT`) plus a persistent disk for SQLite.
 3. In the Render dashboard, set the secret env vars marked `sync: false` in `render.yaml` — at minimum `HUNAR_API_KEY`.
-4. Once deployed, set `PUBLIC_BASE_URL` to the service's actual public URL (e.g. `https://ai-hiring-suite-backend.onrender.com`) — this is what gets registered with Hunar as the webhook callback target, so it must resolve.
+4. **Required post-deploy step:** once deployed, set `PUBLIC_BASE_URL` in the Render dashboard to the service's actual public HTTPS URL (e.g. `https://ai-hiring-suite-backend.onrender.com`) — this is what gets registered with Hunar as the webhook callback target, so it must be the full `https://` base URL (not just a hostname or `host:port`), and it must resolve. `render.yaml` intentionally leaves this as `sync: false` rather than auto-deriving it, since Render's auto-derived value is not a valid full URL. If you skip this step, webhook callbacks won't be registered — the app still degrades gracefully because the background reconciler polls Hunar directly for call results, but updates arrive on the polling interval instead of instantly.
 
 ### Frontend → Vercel
 

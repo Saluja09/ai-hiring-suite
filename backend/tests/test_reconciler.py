@@ -27,6 +27,47 @@ class FakeHunarClient:
 
 
 @pytest.mark.anyio
+async def test_reconcile_pending_publishes_update_keyed_by_id(monkeypatch):
+    """Regression test: the SSE payload published by the reconciler must
+    carry the call id under the key "id" (matching frontend CallRow.id),
+    not only "call_id" — otherwise the live dashboard never merges the
+    reconciled update in.
+    """
+    import app.services.reconciler as reconciler_module
+
+    with Session(engine) as s:
+        c = Campaign(name="idkey", kind="hiring")
+        s.add(c)
+        s.commit()
+        s.refresh(c)
+        s.add(Call(id="call-recon-idkey", campaign_id=c.id, status="IN_PROGRESS"))
+        s.commit()
+
+    fake = FakeHunarClient(
+        responses={
+            "call-recon-idkey": {
+                "status": "COMPLETED",
+                "result": {"interested": True},
+            }
+        }
+    )
+
+    published = {}
+
+    async def fake_publish(campaign_id, payload):
+        published["campaign_id"] = campaign_id
+        published["payload"] = payload
+
+    monkeypatch.setattr(reconciler_module, "publish", fake_publish)
+
+    with Session(engine) as s:
+        count = await reconcile_pending(s, fake)
+
+    assert count == 1
+    assert published["payload"]["id"] == "call-recon-idkey"
+
+
+@pytest.mark.anyio
 async def test_reconcile_pending_updates_non_terminal_call():
     with Session(engine) as s:
         c = Campaign(name="x", kind="hiring")
