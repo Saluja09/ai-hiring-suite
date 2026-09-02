@@ -95,6 +95,24 @@ export interface SearchResult {
 }
 
 // ---------------------------------------------------------------------------
+// POST /api/attendance/rollcall
+// ---------------------------------------------------------------------------
+
+export interface AttendanceRollcallRequest {
+  location: string;
+  supervisor_phone: string;
+  worker_names: string[];
+  language?: VoiceLanguage;
+  voice_persona?: VoicePersona;
+}
+
+export interface AttendanceRollcallResponse {
+  campaign_id: number;
+  agent_id: string;
+  call: CallRow;
+}
+
+// ---------------------------------------------------------------------------
 // Internal request helper
 // ---------------------------------------------------------------------------
 
@@ -158,6 +176,16 @@ export const api = {
     return request<SearchResult[]>("/api/search", {
       method: "POST",
       body: JSON.stringify({ jd, limit }),
+    });
+  },
+
+  /** Build an attendance roll-call agent and dial the site supervisor. */
+  attendanceRollcall(
+    body: AttendanceRollcallRequest,
+  ): Promise<AttendanceRollcallResponse> {
+    return request<AttendanceRollcallResponse>("/api/attendance/rollcall", {
+      method: "POST",
+      body: JSON.stringify(body),
     });
   },
 };
