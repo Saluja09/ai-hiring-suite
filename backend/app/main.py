@@ -1,9 +1,12 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.db import init_db
 from app.routers import agents, attendance, calls, search, stream, webhooks
+from app.services.reconciler import reconciler_loop
 
 app = FastAPI(title="AI Hiring Suite")
 app.add_middleware(
@@ -24,6 +27,21 @@ app.include_router(attendance.router)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    if get_settings().hunar_api_key:
+        app.state.reconciler_task = asyncio.create_task(reconciler_loop())
+    else:
+        app.state.reconciler_task = None
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    task = getattr(app.state, "reconciler_task", None)
+    if task is not None:
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
 
 
 @app.get("/health")

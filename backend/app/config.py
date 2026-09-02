@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     pdl_api_key: str = ""
     database_url: str = "sqlite:///./app.db"
     cors_origins: str = "*"
+    reconciler_interval_seconds: int = 30
 
 
 @lru_cache
