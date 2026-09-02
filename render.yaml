@@ -1,0 +1,79 @@
+# Render Blueprint — deploys the FastAPI backend as a web service.
+#
+# Usage: connect this repo in the Render dashboard ("New +" -> "Blueprint"),
+# point it at this file, and Render will create the service below. Secrets
+# marked `sync: false` are NOT stored here — you set them once in the Render
+# dashboard after the service is created (Environment tab).
+#
+# This does NOT deploy the frontend. Deploy `frontend/` separately on Vercel
+# (see README.md "Deployment" section) and point it at this service's URL
+# via NEXT_PUBLIC_API_BASE_URL.
+
+services:
+  - type: web
+    name: ai-hiring-suite-backend
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+
+    # Persistent disk so the SQLite database survives restarts/deploys.
+    # Render's filesystem is otherwise ephemeral.
+    disk:
+      name: ai-hiring-suite-data
+      mountPath: /var/data
+      sizeGB: 1
+
+    envVars:
+      # --- Required secret: set in the Render dashboard, never in git. ---
+      - key: HUNAR_API_KEY
+        sync: false
+
+      # --- Optional secrets: only needed if you enable that feature. ---
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PDL_API_KEY
+        sync: false
+
+      # --- Hunar Voice API base URL (public, safe to commit). ---
+      - key: HUNAR_BASE_URL
+        value: https://api.voice.hunar.ai/external/v1
+
+      # --- This service's own public HTTPS URL, used to register webhook
+      # callbacks with Hunar. Render exposes this automatically; if it
+      # doesn't resolve for your plan, set it manually in the dashboard to
+      # https://<your-service-name>.onrender.com ---
+      - key: PUBLIC_BASE_URL
+        fromService:
+          type: web
+          name: ai-hiring-suite-backend
+          property: hostport
+        # NOTE: `hostport` gives host:port, not a full https URL. If Render's
+        # blueprint sync doesn't produce a valid URL for your account/plan,
+        # just set PUBLIC_BASE_URL manually in the dashboard instead, e.g.
+        # PUBLIC_BASE_URL=https://ai-hiring-suite-backend.onrender.com
+
+      # --- LLM provider used for JD parsing/result summarization.
+      # "none" disables LLM calls entirely (safe default, no key needed). ---
+      - key: LLM_PROVIDER
+        value: none
+
+      # --- SQLite path on the persistent disk mounted above. ---
+      - key: DATABASE_URL
+        value: sqlite:////var/data/app.db
+
+      # --- CORS: tighten to your deployed frontend origin after Vercel deploy,
+      # e.g. https://your-app.vercel.app ---
+      - key: CORS_ORIGINS
+        value: "*"
+
+      # --- How often (seconds) the background reconciler polls Hunar for
+      # any call results missed by webhook delivery. ---
+      - key: RECONCILER_INTERVAL_SECONDS
+        value: "30"
