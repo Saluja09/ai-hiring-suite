@@ -80,6 +80,7 @@ def test_create_calls_normalizes_and_injects_callback(monkeypatch):
     app.dependency_overrides.clear()
     assert r.status_code == 200
     assert r.json()[0]["mobile_number"] == "+918837518407"
+    assert r.json()[0]["callee_name"] == "A"
 
 
 def test_create_calls_injects_public_base_url_callback(monkeypatch):
@@ -167,6 +168,9 @@ def test_create_calls_skips_row_with_missing_id_but_persists_good_row(monkeypatc
     assert len(body) == 2
     bad_entries = [row for row in body if row.get("error") == "missing call id"]
     assert len(bad_entries) == 1
+    assert bad_entries[0]["callee_name"] == "Bad"
+    good_entries = [row for row in body if row.get("error") != "missing call id"]
+    assert good_entries[0]["callee_name"] == "Good"
     with Session(engine) as s:
         rows = s.exec(select(Call).where(Call.id == "call-good")).all()
         assert len(rows) == 1

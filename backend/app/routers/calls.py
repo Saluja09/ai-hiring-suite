@@ -97,6 +97,7 @@ async def create_calls(
             if not call_id:
                 result.append(
                     {
+                        "callee_name": created.get("callee_name") or name,
                         "mobile_number": created.get("mobile_number", phone),
                         "status": status,
                         "error": "missing call id",
@@ -126,6 +127,7 @@ async def create_calls(
             result.append(
                 {
                     "id": call_id,
+                    "callee_name": created.get("callee_name") or name,
                     "mobile_number": created.get("mobile_number", phone),
                     "status": status,
                 }

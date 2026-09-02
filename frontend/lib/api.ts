@@ -75,6 +75,7 @@ export interface CandidateInput {
 
 export interface CallRow {
   id?: string;
+  callee_name?: string;
   mobile_number: string;
   status?: CallStatus | string | null;
   error?: string;

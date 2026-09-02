@@ -94,7 +94,7 @@ export default function HiringAssistantPage() {
         const rows = await api.createCalls(agent.campaignId, candidates);
         const seeded: CallRow[] = rows.map((row, index) => ({
           id: row.id ?? `pending-${index}`,
-          callee_name: candidates[index]?.name ?? null,
+          callee_name: row.callee_name ?? candidates[index]?.name ?? null,
           mobile_number: row.mobile_number,
           status: row.status ?? "SCHEDULED",
         }));
