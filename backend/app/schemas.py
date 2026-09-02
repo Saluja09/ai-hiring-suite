@@ -100,7 +100,7 @@ class AgentCreate(BaseModel):
         ..., min_length=3, description="Agent introduction text"
     )
     result_prompt: Optional[str] = Field(
-        ...,
+        default=None,
         min_length=3,
         description="Prompt for result generation from the conversation.",
     )

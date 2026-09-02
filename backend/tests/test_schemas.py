@@ -28,6 +28,19 @@ def test_recipient_custom_data_str_values():
     assert r.custom_data["job_role"] == "Rider"
 
 
+def test_agent_create_without_result_prompt_succeeds():
+    """Test that AgentCreate can be constructed without result_prompt."""
+    a = AgentCreate(
+        name="Screening Agent",
+        voice_persona=VoicePersona.NEHA,
+        agent_prompt="ask things",
+        objective="screen",
+        introduction="hi there",
+        result_schema={"interested": "boolean"},
+    )
+    assert a.result_prompt is None
+
+
 def test_empty_result_schema_raises_validation_error():
     """Test that an empty result_schema raises a validation error."""
     with pytest.raises(ValueError):
