@@ -180,10 +180,21 @@ export function ResultsTable({
   );
 
   React.useEffect(() => {
-    setCalls(initialCalls);
-    // Only reset from props when the underlying call list identity changes;
-    // live updates below merge into the current state independently.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Merge (never reset): keep existing rows as-is — they may hold live
+    // SSE updates that are fresher than this snapshot per our backend
+    // contract — and only append rows from initialCalls whose id isn't
+    // already present. This keeps a non-memoized initialCalls prop from a
+    // parent re-render from silently discarding SSE-driven row updates.
+    setCalls((prev) => {
+      const existingIds = new Set(prev.map((call) => call.id));
+      const additions = initialCalls.filter(
+        (call) => !existingIds.has(call.id),
+      );
+      if (additions.length === 0) {
+        return prev;
+      }
+      return [...prev, ...additions];
+    });
   }, [initialCalls]);
 
   React.useEffect(() => {
