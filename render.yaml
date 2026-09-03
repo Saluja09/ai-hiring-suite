@@ -75,10 +75,11 @@ services:
       - key: DATABASE_URL
         value: sqlite:///./app.db
 
-      # --- CORS: tighten to your deployed frontend origin after Vercel deploy,
-      # e.g. https://your-app.vercel.app ---
+      # --- CORS: locked to the deployed frontend origin. Update this if the
+      # Vercel URL changes; use "*" only for quick local/testing against the
+      # deployed backend. ---
       - key: CORS_ORIGINS
-        value: "*"
+        value: "https://ai-hiring-suite.vercel.app"
 
       # --- How often (seconds) the background reconciler polls Hunar for
       # any call results missed by webhook delivery. ---

@@ -8,13 +8,30 @@ A recruiter pastes a job description, the app auto-builds a multilingual voice a
 
 ---
 
+## Live demo
+
+| | |
+|---|---|
+| **App** | https://ai-hiring-suite.vercel.app |
+| **Repo** | https://github.com/Saluja09/ai-hiring-suite |
+
+Each page has a **guided tour** — it auto-starts on first visit, and a **"Take a tour"** button replays it. Your session is **persisted**: refresh the page and the dashboard restores.
+
+A few things worth knowing before you click around:
+
+- **First request may be slow (~30–60s).** The backend runs on a free Render instance that sleeps after ~15 min idle; the first call after a sleep cold-starts. Subsequent calls are fast. (This also means the backend's SQLite data resets on a full spin-down — fine for a demo; the app rehydrates gracefully.)
+- **Placing a call dials a real phone via Hunar.** In the Hiring Assistant and Attendance demos, enter a phone number you can actually answer. Calls only connect during Hunar's configured window (roughly 08:00–21:00 IST).
+- **People Search returns real people** from People Data Labs (names, titles, companies, LinkedIn). PDL's free tier masks phone numbers, so each real profile is shown with a clearly-labeled **demo number** so the search → call → dashboard flow still works end-to-end. Queries with no PDL match (e.g. India-specific frontline roles) fall back to a labeled **sample dataset** so the demo never comes up empty.
+
+---
+
 ## What it does
 
 ### 1. AI Hiring Assistant — `/hiring-assistant`
 Paste a job description. The backend turns it into a Hunar voice agent (script + a `result_schema` describing what to extract from the conversation), you add candidate phone numbers, and the app places outbound screening calls. Each call's structured result (availability, expected salary, relevant experience, etc.) streams live into a dashboard whose **columns are generated from the agent's `result_schema`** — no hardcoded UI per role.
 
 ### 2. People Search & Reachout — `/people-reachout`
-Describe the kind of candidate you're looking for; the app searches a people-data provider (mock provider by default, so it works with zero external keys; [People Data Labs](https://www.peopledatalabs.com/) if `PDL_API_KEY` is set) and reuses the same call engine to reach out to matches by voice.
+Describe the kind of candidate you're looking for; the app searches [People Data Labs](https://www.peopledatalabs.com/) for real matching profiles (name, title, company, LinkedIn) and reuses the same call engine to reach out to them by voice. The provider is pluggable behind a clean interface: with a `PDL_API_KEY` set it returns live PDL data (falling back to a bundled sample dataset when PDL has no match, so the demo is never empty); with no key it runs entirely on the sample dataset. Because PDL's free tier masks phone numbers, real profiles are shown with a labeled demo number so the outbound-call flow stays fully exercisable.
 
 ### 3. No-Smartphone Attendance Strategy — `/attendance`
 Most frontline workers don't reliably carry a smartphone to a badge-in app. `docs/attendance-strategy.md` lays out a voice-first attendance strategy (IVR check-in, voice roll-call, escalation paths), and `/attendance` includes a working voice roll-call proof of concept built on the same call engine.
