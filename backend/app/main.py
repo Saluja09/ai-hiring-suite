@@ -46,4 +46,19 @@ async def on_shutdown():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    """Health + non-secret config diagnostics.
+
+    Reports the resolved Hunar base URL and whether a key is configured
+    (masked — never the value) so misconfiguration is diagnosable without
+    exposing secrets.
+    """
+    s = get_settings()
+    key = s.hunar_api_key or ""
+    return {
+        "status": "ok",
+        "hunar_base_url": s.hunar_base_url,
+        "hunar_key_configured": bool(key),
+        "hunar_key_len": len(key),
+        "public_base_url_set": bool(s.public_base_url),
+        "llm_provider": s.llm_provider,
+    }
