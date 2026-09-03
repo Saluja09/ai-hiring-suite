@@ -84,3 +84,5 @@ services:
       # any call results missed by webhook delivery. ---
       - key: RECONCILER_INTERVAL_SECONDS
         value: "30"
+
+# Blueprint validated for Render free tier (no persistent disk).
