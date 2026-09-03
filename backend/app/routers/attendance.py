@@ -56,6 +56,7 @@ async def create_rollcall(
         session.add(campaign)
         session.commit()
         session.refresh(campaign)
+        campaign_id = campaign.id
 
         e164 = to_e164(body.supervisor_phone)
 
@@ -87,9 +88,10 @@ async def create_rollcall(
         if not call_id:
             raise HTTPException(status_code=502, detail="Hunar call response missing id")
 
+        candidate_name = f"{body.location} supervisor"
         candidate = Candidate(
-            campaign_id=campaign.id,
-            name=f"{body.location} supervisor",
+            campaign_id=campaign_id,
+            name=candidate_name,
             phone=e164,
             source="manual",
             custom_data=custom_data,
@@ -97,11 +99,12 @@ async def create_rollcall(
         session.add(candidate)
         session.commit()
         session.refresh(candidate)
+        candidate_id = candidate.id
 
         call_row = Call(
             id=call_id,
-            campaign_id=campaign.id,
-            candidate_id=candidate.id,
+            campaign_id=campaign_id,
+            candidate_id=candidate_id,
             status=call_response.get("status"),
             request_id=call_response.get("request_id"),
         )
@@ -110,13 +113,13 @@ async def create_rollcall(
 
         call_result = {
             "id": call_id,
-            "callee_name": call_response.get("callee_name") or candidate.name,
+            "callee_name": call_response.get("callee_name") or candidate_name,
             "mobile_number": call_response.get("mobile_number", e164),
             "status": call_response.get("status"),
         }
 
     return {
-        "campaign_id": campaign.id,
+        "campaign_id": campaign_id,
         "agent_id": agent_id,
         "call": call_result,
     }
