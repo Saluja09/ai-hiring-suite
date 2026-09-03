@@ -15,7 +15,45 @@ used to do.
 Put those two facts together and attendance stops being an app problem and
 becomes a **daily voice roll-call** problem — which is exactly Hunar's
 thesis: *80% of HR is calling*. The tool for this job already exists; it
-just needs to be pointed at attendance instead of screening.
+just needs to be pointed at attendance instead of screening. Hunar's own
+platform already "functions largely over phone calls" for frontline
+workforce management [5] — this design simply extends that operating model
+to attendance.
+
+## Real-world precedent: why app-first attendance fails
+
+This isn't hypothetical. India ran the largest app-first attendance
+experiment in the world — and rolled it back.
+
+Under **MGNREGA** (the national rural employment guarantee scheme), paper
+muster rolls were replaced by the **National Mobile Monitoring System
+(NMMS)** app, which required supervisors to upload **two geo-tagged,
+time-stamped photographs of the workforce per day, taken about four hours
+apart** — mandatory from **1 January 2023** [1][8]. On paper it was a
+modern, tamper-proof digital system.
+
+In practice it failed on both counts — inclusion *and* fraud — and on
+**8 July 2025 the Union Ministry of Rural Development backtracked**,
+issuing a directive requiring **manual verification** of the digital
+records after roughly four years of digital-first operation [2]. The
+documented failure modes are instructive:
+
+- **It excluded the workers it was counting.** The app's smartphone-and-
+  connectivity dependency meant that where the network was weak, attendance
+  simply didn't record — at one worksite only **1 of 30 present workers**
+  was captured, and Anganwadi workers have been reported **walking uphill to
+  find a signal** to complete uploads [3][9].
+- **It didn't even stop fraud.** Supervisors uploaded pre-captured or reused
+  photos, recycled identical photos across muster rolls, and uninstalled/
+  reinstalled the app to skip the afternoon photo; the later face-based
+  version could even accept a *video* of a worker's face as "live" [3].
+
+The lesson is the core argument for this design: an app-first, smartphone-
+and-connectivity-dependent, photo-based system **excludes the very workers
+it counts and still doesn't stop fraud**. A **voice call over the ordinary
+phone network** — no app, no data, no smartphone, works on any feature
+phone — sidesteps exactly this failure mode. That is precisely the gap a
+voice-AI roll-call fills.
 
 ## The design
 
@@ -38,6 +76,14 @@ This mirrors the proven Hunar building blocks: multilingual voice (12
 languages — Hindi, Tamil, Telugu, Marathi, etc.), retry logic, call-time
 guardrails (only call during agreed shift-start windows), and structured
 result extraction — all already live in this codebase.
+
+The "call from a known number" mechanic is itself an established
+verification pattern: commercial **IVR phone-based time clocks** already let
+field staff clock in and out by *calling a designated number from an
+approved phone* and following voice prompts — with the phone number itself
+acting as a job-site checkpoint, no GPS or app required [4]. We apply the
+same idea at the supervisor level: the roster binds each site to a known
+supervisor number, and the roll-call runs against it.
 
 ## Scale math: why 100 calls, not 1,000
 
@@ -67,8 +113,9 @@ The trick is to roster **by location**, not by worker:
 | Supervisor doesn't pick up | Auto-retry with backoff (2–3 attempts within the call window); escalate to a named backup contact at the site; flag as "unreported" in the exceptions queue if all contacts fail. |
 | Bad audio / regional accent / background noise | Confirmation read-back at end of call; any name transcribed with low confidence is routed to a human review queue instead of silently auto-filed. |
 | Supervisor–worker disputes ("I called that in!") | Every call is recorded; the recording URL and structured result are attached to that day's attendance record as evidence. |
-| Poor connectivity at remote sites | Feature-phone/basic-phone calling works over the standard voice network (no data needed); missed-call-to-callback and USSD-style "press 1 for present, 2 for absent" fallbacks work even with heavy background noise or spotty audio. |
-| Proxy / fraudulent attendance (supervisor rubber-stamping) | Periodic random voice spot-checks that call 2–3 individual workers directly to confirm they're on-site; pattern-detection on suspiciously identical daily rosters. |
+| Poor connectivity at remote sites | Feature-phone/basic-phone calling works over the standard voice network (no data needed) — the exact failure that broke MGNREGA's app is designed out here. A **missed-call-to-callback** fallback (the supervisor gives a missed call and the system rings back within ~a minute) is a proven Indian pattern — Gram Vaani's *Mobile Vaani* runs entirely on it, since incoming calls are free in India [6][7]; a USSD-style "press 1 for present, 2 for absent" path handles heavy background noise. |
+| Proxy / fraudulent attendance (supervisor rubber-stamping, buddy-punching) | Even India's photo-and-face system was defeated by proxy loopholes [3], so no single signal is trusted: periodic random voice spot-checks call 2–3 individual workers directly; pattern-detection flags suspiciously identical daily rosters; call recordings serve as dispute evidence. |
+| Ghost workers (names on the roll that don't exist) | Bind each roster entry to a verified identity at enrolment (Aadhaar/e-KYC-style seeding is the countermeasure India itself uses against duplicate/fake job cards) so the roll-call runs against real people, not padded lists [10]. |
 
 ## Architecture
 
@@ -108,10 +155,12 @@ is API concurrency, not people.
 
 - **Paper registers**: no aggregation, no real-time visibility, easy to
   fudge, expensive to collect and reconcile across 100 sites.
-- **Biometric hardware**: requires per-site capital investment, installation,
-  maintenance, and power/connectivity at every location — infeasible to
-  deploy overnight across 100 remote sites, and still useless without an app
-  or network to report the data back.
+- **Biometric hardware / app-based photo capture**: requires per-site capital
+  investment, installation, maintenance, and power/connectivity at every
+  location — infeasible to deploy overnight across 100 remote sites, and
+  still useless without an app or network to report the data back. This is
+  not a theoretical objection: it is precisely what forced India's NMMS
+  rollback [2][3].
 - **SMS-based check-in**: assumes literacy and typing comfort, and still
   needs a way to structure free-text replies from 100 different people —
   which is the same LLM-structuring problem, minus the accessibility of
@@ -120,4 +169,45 @@ is API concurrency, not people.
 Voice is the one channel that already reaches every site, requires no new
 hardware, needs no literacy or typing, and — with an LLM on the other end —
 can finally turn an unstructured conversation into a clean daily attendance
-record.
+record. And the reach is already there: India has ~1.16 billion active
+mobile subscribers, and Indian voice-AI runs on standard TRAI-compliant
+telephony with no app required [8], so a phone-network roll-call is
+immediately deployable at national scale.
+
+## Sources
+
+1. ThePrint — *Modi govt plans face authentication for MGNREGS attendance*
+   (NMMS: two geo-tagged, time-stamped photos/day, mandatory 1 Jan 2023):
+   https://theprint.in/india/governance/modi-govt-plans-face-authentication-for-mgnregs-attendance-eyes-2024-launch/1887436/
+2. Down To Earth — *Rural ministry backtracks on digital-first attendance
+   for MGNREGS workers after misuse and manipulation* (8 Jul 2025 manual-
+   verification directive):
+   https://www.downtoearth.org.in/governance/rural-ministry-backtracks-on-digital-first-attendance-system-for-mgnregs-workers-after-misuse-and-manipulation-instances
+3. The Wire — *NMMS Didn't End Corruption in MGNREGA. It Changed Its Shape
+   and Locked Workers Out* (1-of-30 capture; proxy loopholes):
+   https://thewire.in/labour/nmms-didnt-end-corruption-in-mgnrega-it-changed-its-shape-and-locked-workers-out
+4. Chronotek — *IVR employee time clock for field teams* (call-from-approved-
+   number checkpoint, no app):
+   https://www.chronotek.com/blog/ivr-employee-time-clock-field-teams
+5. ElevenLabs — *Hunar AI* case study ("functions largely over phone calls"):
+   https://elevenlabs.io/blog/hunar
+6. Gram Vaani — *Ringing in change* (Mobile Vaani free missed-call IVR):
+   https://gramvaani.org/ringing-in-change/
+7. Slate — *How missed calls became a COVID lifeline in rural India*
+   (missed-call callback model; incoming calls free):
+   https://slate.com/technology/2021/06/mobile-vaani-missed-calls-rural-india-covid.html
+8. Ozonetel — *Best voicebot platforms* (TRAI-compliant telephony, no app;
+   ~1.16B subscribers): https://ozonetel.com/best-voicebot-platforms/ and
+   PIB / NIC on NMMS: https://www.pib.gov.in/Pressreleaseshare.aspx?PRID=1845371
+9. The News Minute — *Facial recognition on Poshan app: Anganwadi workers
+   fear exclusion* (connectivity failures in the field):
+   https://www.thenewsminute.com/news/facial-recognition-on-poshan-app-anganwadi-workers-and-activists-fear-exclusion-privacy-risks
+10. Organiser — *Govt tightens MGNREGA monitoring: Aadhaar e-KYC to eliminate
+    ghost workers* (identity binding against fake job cards):
+    https://organiser.org/2025/11/23/327092/bharat/govt-tightens-mgnrega-monitoring-aadhaar-e-kyc-to-eliminate-ghost-workers-and-safeguard-genuine-labour/
+
+*Note: sources [3][9][10] were gathered from credible outlets (The Wire,
+The News Minute, Organiser) but reached us during a partial research run;
+the load-bearing claims — the NMMS photo mandate [1], the July 2025 manual-
+verification backtrack [2], the IVR checkpoint model [4], and Hunar's
+phone-first operation [5] — were independently verified.*

@@ -179,6 +179,47 @@ export default function AttendancePage() {
         </section>
 
         <section className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold tracking-tight">
+            Real-world precedent: why app-first attendance fails
+          </h2>
+          <p className="text-muted-foreground text-pretty">
+            This isn&apos;t hypothetical. India ran the world&apos;s largest
+            app-first attendance experiment — and rolled it back. Under{" "}
+            <strong className="text-foreground">MGNREGA</strong>, paper muster
+            rolls were replaced by the National Mobile Monitoring System
+            (NMMS) app, requiring{" "}
+            <strong className="text-foreground">
+              two geo-tagged, time-stamped photos of the workforce per day
+            </strong>{" "}
+            (mandatory from Jan 2023). On{" "}
+            <strong className="text-foreground">8 July 2025</strong> the Union
+            Ministry of Rural Development backtracked, ordering manual
+            verification after ~4 years.
+          </p>
+          <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+            <li>
+              <strong className="text-foreground">It excluded the workers it counted</strong>
+              {" "}— where the network was weak, attendance didn&apos;t record.
+              At one worksite only 1 of 30 present workers was captured;
+              Anganwadi workers walk uphill to find a signal.
+            </li>
+            <li>
+              <strong className="text-foreground">It didn&apos;t stop fraud</strong>
+              {" "}— reused/pre-captured photos, app reinstall to skip the
+              afternoon photo, and a face-video accepted as &ldquo;live.&rdquo;
+            </li>
+          </ul>
+          <p className="text-muted-foreground text-pretty">
+            The lesson, and the core argument for this design: an app-first,
+            connectivity-dependent, photo-based system excludes the very
+            workers it counts and still doesn&apos;t stop fraud. A voice call
+            over the ordinary phone network — no app, no data, no smartphone —
+            sidesteps exactly this failure mode. (Sources cited in{" "}
+            <code className="text-foreground">docs/attendance-strategy.md</code>.)
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold tracking-tight">The design</h2>
           <p className="text-muted-foreground text-pretty">
             Each morning, an outbound multilingual voice AI agent calls the
@@ -267,12 +308,15 @@ export default function AttendancePage() {
           </h2>
           <p className="text-muted-foreground text-pretty">
             Paper registers don&apos;t aggregate and are easy to fudge.
-            Biometric hardware needs per-site capital investment and
-            connectivity you can&apos;t deploy overnight across 100 remote
-            sites. SMS check-ins assume literacy and typing comfort. Voice is
-            the one channel that already reaches every site, needs no new
-            hardware, and — with an LLM on the other end — turns an
-            unstructured conversation into a clean daily attendance record.
+            Biometric hardware and app-based photo capture need per-site
+            capital investment and connectivity you can&apos;t deploy
+            overnight across 100 remote sites — precisely what forced
+            India&apos;s NMMS rollback. SMS check-ins assume literacy and
+            typing comfort. Voice is the one channel that already reaches
+            every site (India has ~1.16B mobile subscribers on standard
+            telephony), needs no new hardware, and — with an LLM on the other
+            end — turns an unstructured conversation into a clean daily
+            attendance record.
           </p>
         </section>
 
