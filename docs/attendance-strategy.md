@@ -85,6 +85,54 @@ acting as a job-site checkpoint, no GPS or app required [4]. We apply the
 same idea at the supervisor level: the roster binds each site to a known
 supervisor number, and the roll-call runs against it.
 
+## The trust problem — and why one silver bullet won't fix it
+
+A fair objection: if attendance is *only* "the supervisor reads out who's
+present," the supervisor becomes a single point of fraud. He can mark ghost
+workers present, cover for an absent friend, or rubber-stamp the whole list.
+Supervisor-attestation alone is not trustworthy.
+
+The tempting fix is to make **per-worker voice biometrics** the universal
+gate — call every worker, match a voiceprint, done. But that swaps one
+problem for a worse one, and the real world proves it:
+
+- **It breaks scale and inclusion.** Now it's 1,000 calls/day with an
+  enrolled voiceprint per worker. Accents, worksite noise, feature-phone
+  audio compression, colds, and shared phones drive false rejections that
+  *lock out real workers* — exactly the failure that made India roll back
+  MGNREGA's photo/face-auth system after real workers went uncounted [2][3].
+- **Biometrics still get spoofed.** MGNREGA's face check accepted a *video*
+  of a worker's face as "live" [3]; a recorded voice clip is the audio
+  equivalent. Biometrics raise the bar; they don't close the hole.
+
+So the correct design is not supervisor **or** biometric — it's **layered,
+risk-based verification** where no single actor is trusted:
+
+1. **Baseline — supervisor roll-call** (the 100-call, inclusive, scalable
+   layer above). Fast attendance for everyone, every day.
+2. **Sampled worker verification** — each day the system independently calls
+   a *random subset* of workers directly and asks them to confirm their own
+   presence. Here voice becomes a *verification signal*: a **voiceprint
+   match against enrolment** and/or a **liveness challenge** ("say today's
+   site code word") that a replayed clip fails. This is cheap because it's a
+   sample, not the whole workforce — and it makes rubber-stamping risky
+   without gating every real worker behind a fragile biometric.
+3. **Risk-triggered escalation** — anomaly detection (a supervisor whose
+   roster is suspiciously identical day-to-day, or whose numbers don't match
+   payroll/output) raises that site's sampling rate and routes it to human
+   review. Effort follows suspicion instead of taxing everyone equally.
+4. **Identity binding at enrolment** — Aadhaar/e-KYC-style seeding of the
+   roster (the countermeasure India uses against duplicate/fake job cards
+   [10]) ensures the names being called out are *real people*, closing the
+   ghost-worker hole at the source rather than at the daily call.
+
+The result: supervisor collusion no longer silently succeeds, because a
+supervisor can't predict which of his workers the system will call to verify
+today, and can't fake a live voiceprint challenge for an absent one — while
+genuine workers are never locked out by a biometric gate they might fail.
+Voice recognition is a *component of the verification layer*, not the
+universal turnstile.
+
 ## Scale math: why 100 calls, not 1,000
 
 The trick is to roster **by location**, not by worker:
@@ -114,7 +162,7 @@ The trick is to roster **by location**, not by worker:
 | Bad audio / regional accent / background noise | Confirmation read-back at end of call; any name transcribed with low confidence is routed to a human review queue instead of silently auto-filed. |
 | Supervisor–worker disputes ("I called that in!") | Every call is recorded; the recording URL and structured result are attached to that day's attendance record as evidence. |
 | Poor connectivity at remote sites | Feature-phone/basic-phone calling works over the standard voice network (no data needed) — the exact failure that broke MGNREGA's app is designed out here. A **missed-call-to-callback** fallback (the supervisor gives a missed call and the system rings back within ~a minute) is a proven Indian pattern — Gram Vaani's *Mobile Vaani* runs entirely on it, since incoming calls are free in India [6][7]; a USSD-style "press 1 for present, 2 for absent" path handles heavy background noise. |
-| Proxy / fraudulent attendance (supervisor rubber-stamping, buddy-punching) | Even India's photo-and-face system was defeated by proxy loopholes [3], so no single signal is trusted: periodic random voice spot-checks call 2–3 individual workers directly; pattern-detection flags suspiciously identical daily rosters; call recordings serve as dispute evidence. |
+| Proxy / fraudulent attendance (supervisor rubber-stamping, buddy-punching) | Addressed structurally by the layered verification model above — supervisor roll-call is only the baseline; sampled + risk-triggered direct-worker calls with voiceprint/liveness challenges mean collusion can't reliably succeed, while call recordings serve as dispute evidence. No single actor is trusted. |
 | Ghost workers (names on the roll that don't exist) | Bind each roster entry to a verified identity at enrolment (Aadhaar/e-KYC-style seeding is the countermeasure India itself uses against duplicate/fake job cards) so the roll-call runs against real people, not padded lists [10]. |
 
 ## Architecture

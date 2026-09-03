@@ -323,6 +323,60 @@ export default function AttendancePage() {
 
         <section className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold tracking-tight">
+            The trust problem — why one silver bullet won&apos;t fix it
+          </h2>
+          <p className="text-muted-foreground text-pretty">
+            Fair objection: if attendance is <em>only</em> the supervisor
+            reading out who&apos;s present, he becomes a single point of fraud
+            — he can mark ghosts present or cover for a friend. But making
+            per-worker <strong className="text-foreground">voice biometrics</strong>{" "}
+            the universal gate is worse: it means 1,000 calls/day, and
+            accents, worksite noise, and feature-phone audio cause false
+            rejections that <em>lock out real workers</em> — exactly what made
+            India roll back MGNREGA&apos;s face-auth system. (Biometrics also
+            get spoofed — that system accepted a video of a face as
+            &ldquo;live.&rdquo;)
+          </p>
+          <p className="text-muted-foreground text-pretty">
+            The right design is{" "}
+            <strong className="text-foreground">layered, risk-based verification</strong>{" "}
+            where no single actor is trusted:
+          </p>
+          <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
+            <li>
+              <strong className="text-foreground">Baseline:</strong> supervisor
+              roll-call — fast, inclusive attendance for everyone daily.
+            </li>
+            <li>
+              <strong className="text-foreground">Sampled worker checks:</strong>{" "}
+              each day the system independently calls a <em>random subset</em>{" "}
+              of workers directly, using a voiceprint match or a liveness
+              challenge (&ldquo;say today&apos;s code word&rdquo;) that a
+              recording fails. Cheap because it&apos;s a sample, not everyone.
+            </li>
+            <li>
+              <strong className="text-foreground">Risk-triggered escalation:</strong>{" "}
+              anomaly detection (suspiciously identical rosters, payroll
+              mismatches) raises that site&apos;s sampling rate — effort
+              follows suspicion.
+            </li>
+            <li>
+              <strong className="text-foreground">Identity binding:</strong>{" "}
+              Aadhaar/e-KYC-style enrolment so the names called out are real
+              people — closing the ghost-worker hole at the source.
+            </li>
+          </ul>
+          <p className="text-muted-foreground text-pretty">
+            A supervisor can&apos;t predict which workers get verified today,
+            or fake a live challenge for an absent one — while genuine workers
+            are never locked out by a biometric gate they might fail. Voice
+            recognition is a <em>component of the verification layer</em>, not
+            the universal turnstile.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-4">
+          <h2 className="text-xl font-semibold tracking-tight">
             Scale math: 100 calls, not 1,000
           </h2>
           <ul className="list-disc space-y-1.5 pl-5 text-muted-foreground">
