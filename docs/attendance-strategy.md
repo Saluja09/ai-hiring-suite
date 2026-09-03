@@ -29,7 +29,7 @@ Under **MGNREGA** (the national rural employment guarantee scheme), paper
 muster rolls were replaced by the **National Mobile Monitoring System
 (NMMS)** app, which required supervisors to upload **two geo-tagged,
 time-stamped photographs of the workforce per day, taken about four hours
-apart** — mandatory from **1 January 2023** [1][8]. On paper it was a
+apart** — mandatory from **1 January 2023** [1]. On paper it was a
 modern, tamper-proof digital system.
 
 In practice it failed on both counts — inclusion *and* fraud — and on
@@ -206,8 +206,11 @@ immediately deployable at national scale.
     ghost workers* (identity binding against fake job cards):
     https://organiser.org/2025/11/23/327092/bharat/govt-tightens-mgnrega-monitoring-aadhaar-e-kyc-to-eliminate-ghost-workers-and-safeguard-genuine-labour/
 
-*Note: sources [3][9][10] were gathered from credible outlets (The Wire,
-The News Minute, Organiser) but reached us during a partial research run;
-the load-bearing claims — the NMMS photo mandate [1], the July 2025 manual-
-verification backtrack [2], the IVR checkpoint model [4], and Hunar's
-phone-first operation [5] — were independently verified.*
+*Note on sourcing: the NMMS photo mandate [1], the IVR checkpoint model [4],
+Hunar's phone-first operation [5], and the missed-call callback pattern
+[6][7] were independently (adversarially) verified during research. The
+July 2025 manual-verification backtrack [2] and the field-failure and
+anti-fraud details [3][9][10] come from credible outlets (Down To Earth,
+The Wire, The News Minute, Organiser) but were gathered during a partial
+research run and were not adversarially re-confirmed — treat them as
+well-sourced but not independently double-checked here.*
