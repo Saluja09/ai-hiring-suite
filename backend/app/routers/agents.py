@@ -58,5 +58,6 @@ async def create_agent(
         session.add(campaign)
         session.commit()
         session.refresh(campaign)
+        campaign_id = campaign.id
 
-    return {"campaign_id": campaign.id, "agent_id": agent_id}
+    return {"campaign_id": campaign_id, "agent_id": agent_id}
