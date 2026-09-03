@@ -1,0 +1,27 @@
+[project]
+name = "ai-hiring-suite-backend"
+version = "0.1.0"
+description = "AI Hiring Suite backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic-settings",
+    "sqlmodel",
+    "httpx",
+    "sse-starlette",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "respx",
+    "anyio",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
