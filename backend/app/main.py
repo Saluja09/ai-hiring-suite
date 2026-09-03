@@ -55,6 +55,7 @@ def health():
     """
     s = get_settings()
     key = s.hunar_api_key or ""
+    pdl = s.pdl_api_key or ""
     return {
         "status": "ok",
         "hunar_base_url": s.hunar_base_url,
@@ -62,4 +63,7 @@ def health():
         "hunar_key_len": len(key),
         "public_base_url_set": bool(s.public_base_url),
         "llm_provider": s.llm_provider,
+        "pdl_key_configured": bool(pdl),
+        "pdl_key_len": len(pdl),
+        "people_provider": "pdl" if pdl else "mock",
     }
