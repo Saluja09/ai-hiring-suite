@@ -85,13 +85,20 @@ def _extract_locations(jd: str) -> list[str]:
                 locations.append(city)
 
     # "in <place>" pattern (case-insensitive), for locations not in the known
-    # list — e.g. "in san francisco". Take up to 3 words after "in", stopping
-    # at punctuation, and skip if it's obviously not a place.
+    # list — e.g. "in san francisco". Take up to 3 words after "in", but stop
+    # at connector/qualifier words so "in New York with Python" yields
+    # "New York", not "New York with".
+    _STOP = {"with", "and", "for", "who", "that", "having", "using", "plus",
+             "or", "to", "at", "on", "the", "a", "an"}
     for match in re.finditer(
         r"\bin\s+([a-zA-Z]+(?:\s+[a-zA-Z]+){0,2})", jd, flags=re.IGNORECASE
     ):
-        candidate = match.group(1).strip().rstrip(".,")
-        # Avoid capturing trailing skill/qualifier phrases as a "location".
+        words: list[str] = []
+        for w in match.group(1).split():
+            if w.lower() in _STOP:
+                break
+            words.append(w)
+        candidate = " ".join(words).strip().rstrip(".,")
         if candidate and candidate.lower() not in {loc.lower() for loc in locations}:
             locations.append(candidate)
 
