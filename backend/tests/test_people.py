@@ -26,14 +26,45 @@ def test_get_provider_returns_mock_when_no_pdl_key(monkeypatch):
     get_settings.cache_clear()
 
 
-def test_get_provider_returns_pdl_when_key_set(monkeypatch):
+def test_get_provider_returns_pdl_fallback_when_key_set(monkeypatch):
+    from app.clients.people.base import PDLWithMockFallback
+
     monkeypatch.setenv("PDL_API_KEY", "test-key-123")
     get_settings.cache_clear()
     provider = get_provider(get_settings())
-    assert isinstance(provider, PDLProvider)
+    # PDL-backed, but wrapped so it falls back to mock on empty/error.
+    assert isinstance(provider, PDLWithMockFallback)
+    assert isinstance(provider._pdl, PDLProvider)
+    assert isinstance(provider._mock, MockProvider)
     get_settings.cache_clear()
     monkeypatch.delenv("PDL_API_KEY", raising=False)
     get_settings.cache_clear()
+
+
+def test_pdl_fallback_uses_mock_when_pdl_returns_empty():
+    from app.clients.people.base import PDLWithMockFallback
+
+    class EmptyPDL:
+        def search(self, params, limit):
+            return []
+
+    provider = PDLWithMockFallback(EmptyPDL(), MockProvider())
+    results = provider.search({"titles": ["Delivery Rider"], "locations": ["Bangalore"]}, 5)
+    # PDL returned nothing → mock supplies demo-safe results.
+    assert len(results) >= 1
+
+
+def test_pdl_fallback_prefers_pdl_when_it_has_results():
+    from app.clients.people.base import PDLWithMockFallback, PersonResult
+
+    class RealPDL:
+        def search(self, params, limit):
+            return [PersonResult(name="Real Person", title="X", company="Y",
+                                 location="Z", phone="+911234567890")]
+
+    provider = PDLWithMockFallback(RealPDL(), MockProvider())
+    results = provider.search({"titles": ["Delivery Rider"]}, 5)
+    assert len(results) == 1 and results[0].name == "Real Person"
 
 
 def test_mock_provider_falls_back_when_nothing_matches():

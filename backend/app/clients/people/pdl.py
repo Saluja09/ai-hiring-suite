@@ -7,9 +7,13 @@ since the mock provider is the safety net for the demo.
 
 from __future__ import annotations
 
+import logging
+
 import httpx
 
 from app.clients.people.base import PersonResult
+
+logger = logging.getLogger(__name__)
 
 PDL_SEARCH_URL = "https://api.peopledatalabs.com/v5/person/search"
 
@@ -30,8 +34,20 @@ class PDLProvider:
             response.raise_for_status()
             data = response.json()
             records = data.get("data") or []
+            if not records:
+                logger.info("PDL search returned 0 records; falling back to mock.")
             return [_to_person_result(r) for r in records[:limit]]
-        except Exception:
+        except httpx.HTTPStatusError as err:
+            # Surface auth/query errors in logs (e.g. 401 bad key, 402 no credits,
+            # 400 bad query) so misconfiguration is diagnosable — still fall back.
+            logger.warning(
+                "PDL search failed: %s %s",
+                err.response.status_code,
+                err.response.text[:200],
+            )
+            return []
+        except Exception as err:
+            logger.warning("PDL search error: %s", err)
             return []
 
 

@@ -25,15 +25,37 @@ class PeopleProvider(Protocol):
     def search(self, params: dict, limit: int) -> list[PersonResult]: ...
 
 
+class PDLWithMockFallback:
+    """Uses PDL for real data, but falls back to the mock dataset whenever
+    PDL returns no results (common for Indian frontline queries, which PDL's
+    US/white-collar-oriented data covers sparsely) or errors.
+
+    This keeps the demo useful with real data when available, while never
+    showing an empty result set.
+    """
+
+    def __init__(self, pdl, mock) -> None:
+        self._pdl = pdl
+        self._mock = mock
+
+    def search(self, params: dict, limit: int) -> "list[PersonResult]":
+        results = self._pdl.search(params, limit)
+        if results:
+            return results
+        return self._mock.search(params, limit)
+
+
 def get_provider(settings) -> PeopleProvider:
     """Select a people-search provider based on configuration.
 
-    Returns a PDLProvider when `settings.pdl_api_key` is set, otherwise
-    falls back to the MockProvider so search always works out of the box.
+    When `settings.pdl_api_key` is set, returns a PDL-backed provider that
+    falls back to the mock dataset on empty/error results. Otherwise returns
+    the MockProvider so search always works out of the box.
     """
     from app.clients.people.mock import MockProvider
     from app.clients.people.pdl import PDLProvider
 
+    mock = MockProvider()
     if getattr(settings, "pdl_api_key", ""):
-        return PDLProvider(settings.pdl_api_key)
-    return MockProvider()
+        return PDLWithMockFallback(PDLProvider(settings.pdl_api_key), mock)
+    return mock
