@@ -21,12 +21,18 @@ services:
     healthCheckPath: /health
     autoDeployTrigger: commit
 
-    # Persistent disk so the SQLite database survives restarts/deploys.
-    # Render's filesystem is otherwise ephemeral.
-    disk:
-      name: ai-hiring-suite-data
-      mountPath: /var/data
-      sizeGB: 1
+    # NOTE: Render's FREE tier does not support persistent disks, so we use
+    # the ephemeral filesystem for SQLite (DATABASE_URL below). The DB resets
+    # when the free instance spins down after idle — acceptable here because
+    # the stored campaigns/calls are transient demo state: Hunar is the source
+    # of truth and the background reconciler re-pulls call results on restart.
+    #
+    # To make data durable, upgrade `plan` to `starter` (paid) and add a disk:
+    #   disk:
+    #     name: ai-hiring-suite-data
+    #     mountPath: /var/data
+    #     sizeGB: 1
+    # then set DATABASE_URL=sqlite:////var/data/app.db below.
 
     envVars:
       # --- Required secret: set in the Render dashboard, never in git. ---
@@ -64,9 +70,10 @@ services:
       - key: LLM_PROVIDER
         value: none
 
-      # --- SQLite path on the persistent disk mounted above. ---
+      # --- SQLite path. Ephemeral on free tier (resets on spin-down).
+      # For a persistent disk on a paid plan, use sqlite:////var/data/app.db. ---
       - key: DATABASE_URL
-        value: sqlite:////var/data/app.db
+        value: sqlite:///./app.db
 
       # --- CORS: tighten to your deployed frontend origin after Vercel deploy,
       # e.g. https://your-app.vercel.app ---
