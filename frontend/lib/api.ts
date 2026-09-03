@@ -78,7 +78,35 @@ export interface CallRow {
   callee_name?: string;
   mobile_number: string;
   status?: CallStatus | string | null;
+  lifecycle_status?: string | null;
+  engagement_status?: string | null;
+  answered_by?: string | null;
+  duration_seconds?: number | null;
+  recording_url?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  result?: Record<string, any> | null;
+  campaign_id?: number | null;
+  candidate_id?: number | null;
   error?: string;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/campaigns/{campaignId}
+// ---------------------------------------------------------------------------
+
+export interface CampaignInfo {
+  id: number;
+  name: string;
+  kind: string;
+  agent_id?: string | null;
+  result_schema?: Record<string, string> | null;
+  lang?: string | null;
+  voice_persona?: string | null;
+}
+
+export interface GetCampaignResponse {
+  campaign: CampaignInfo;
+  calls: CallRow[];
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +197,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify(candidates),
     });
+  },
+
+  /** Rehydrate a campaign + its calls (used to restore state after a page refresh). */
+  getCampaign(campaignId: number): Promise<GetCampaignResponse> {
+    return request<GetCampaignResponse>(`/api/campaigns/${campaignId}`);
   },
 
   /** Search for candidates matching a job description. */

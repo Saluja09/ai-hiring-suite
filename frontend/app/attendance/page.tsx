@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, CalendarCheck, Loader2, PhoneCall } from "lucide-react";
+import { ArrowLeft, CalendarCheck, Loader2, PhoneCall, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { ResultsTable, type CallRow } from "@/components/results-table";
@@ -29,6 +29,13 @@ import { TourButton } from "@/components/tour-button";
 import { api } from "@/lib/api";
 import { LANGUAGES, PERSONAS } from "@/lib/build-agent";
 import type { VoiceLanguage, VoicePersona } from "@/lib/api";
+import {
+  clearActiveCampaign,
+  loadActiveCampaign,
+  saveActiveCampaign,
+} from "@/lib/session-store";
+
+const PAGE_KEY = "attendance" as const;
 
 const ATTENDANCE_RESULT_SCHEMA: Record<string, string> = {
   present: "string",
@@ -62,7 +69,7 @@ const ARCHITECTURE_DIAGRAM = ` Roster DB (workers × location × supervisor phon
 interface CreatedRollcall {
   campaignId: number;
   agentId: string;
-  call: CallRow;
+  calls: CallRow[];
 }
 
 // CallRow above resolves to components/results-table's stricter type
@@ -79,6 +86,61 @@ export default function AttendancePage() {
   const [persona, setPersona] = React.useState<VoicePersona>("NEHA");
   const [launching, setLaunching] = React.useState(false);
   const [result, setResult] = React.useState<CreatedRollcall | null>(null);
+  // Lazily seeded from localStorage so the "resuming" state is already
+  // correct on the very first render (avoids a synchronous setState call
+  // inside the rehydrate effect below).
+  const [resuming, setResuming] = React.useState(
+    () => loadActiveCampaign(PAGE_KEY) !== null,
+  );
+
+  // On mount, try to rehydrate the last active campaign for this page so a
+  // refresh restores the dashboard instead of resetting to a blank state.
+  React.useEffect(() => {
+    const stored = loadActiveCampaign(PAGE_KEY);
+    if (!stored) {
+      return;
+    }
+    let cancelled = false;
+    api
+      .getCampaign(stored.campaignId)
+      .then((response) => {
+        if (cancelled) return;
+        setResult({
+          campaignId: response.campaign.id,
+          agentId: response.campaign.agent_id ?? "",
+          calls: response.calls.map((row) => ({
+            id: row.id ?? "",
+            callee_name: row.callee_name ?? null,
+            mobile_number: row.mobile_number,
+            status: row.status ?? null,
+            lifecycle_status: row.lifecycle_status ?? null,
+            engagement_status: row.engagement_status ?? null,
+            answered_by: row.answered_by ?? null,
+            duration_seconds: row.duration_seconds ?? null,
+            recording_url: row.recording_url ?? null,
+            result: row.result ?? null,
+          })),
+        });
+      })
+      .catch(() => {
+        // Campaign no longer exists server-side — drop the stale pointer
+        // and fall back to a fresh, empty state rather than crashing.
+        clearActiveCampaign(PAGE_KEY);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setResuming(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleStartOver = React.useCallback(() => {
+    clearActiveCampaign(PAGE_KEY);
+    setResult(null);
+  }, []);
 
   const workerNames = React.useMemo(
     () =>
@@ -106,15 +168,19 @@ export default function AttendancePage() {
         language,
         voice_persona: persona,
       });
-      setResult({
+      const created: CreatedRollcall = {
         campaignId: response.campaign_id,
         agentId: response.agent_id,
-        call: {
-          ...response.call,
-          id: response.call.id ?? `pending-${response.campaign_id}`,
-          status: response.call.status ?? "SCHEDULED",
-        },
-      });
+        calls: [
+          {
+            ...response.call,
+            id: response.call.id ?? `pending-${response.campaign_id}`,
+            status: response.call.status ?? "SCHEDULED",
+          },
+        ],
+      };
+      setResult(created);
+      saveActiveCampaign(PAGE_KEY, created.campaignId, ATTENDANCE_RESULT_SCHEMA);
       toast.success("Roll-call started", {
         description: `Calling the supervisor for ${location.trim()} now.`,
       });
@@ -143,6 +209,18 @@ export default function AttendancePage() {
           Back
         </Link>
         <div className="flex items-center gap-3">
+          {result ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleStartOver}
+              className="gap-1.5 text-muted-foreground"
+            >
+              <RotateCcw className="size-4" />
+              Start over
+            </Button>
+          ) : null}
           <TourButton page="attendance" />
           <Badge variant="outline" className="hidden sm:inline-flex">
             Built on Hunar
@@ -165,6 +243,13 @@ export default function AttendancePage() {
             reuses the same Hunar call engine as the rest of this suite.
           </p>
         </section>
+
+        {resuming ? (
+          <div className="flex items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Resuming your last session…
+          </div>
+        ) : null}
 
         <section className="flex flex-col gap-4">
           <h2 className="text-xl font-semibold tracking-tight">
@@ -433,7 +518,7 @@ export default function AttendancePage() {
             <ResultsTable
               campaignId={result.campaignId}
               resultSchema={ATTENDANCE_RESULT_SCHEMA}
-              initialCalls={[result.call]}
+              initialCalls={result.calls}
             />
           </div>
         ) : null}

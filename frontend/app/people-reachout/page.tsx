@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, PhoneCall, Users } from "lucide-react";
+import { ArrowLeft, Loader2, PhoneCall, RotateCcw, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -17,6 +17,13 @@ import { TourButton } from "@/components/tour-button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, type CandidateInput } from "@/lib/api";
 import { DEFAULT_RESULT_SCHEMA, buildAgentCreateRequest } from "@/lib/build-agent";
+import {
+  clearActiveCampaign,
+  loadActiveCampaign,
+  saveActiveCampaign,
+} from "@/lib/session-store";
+
+const PAGE_KEY = "reachout" as const;
 
 // ---------------------------------------------------------------------------
 // Page
@@ -35,6 +42,67 @@ export default function PeopleReachoutPage() {
   const [agent, setAgent] = React.useState<CreatedAgent | null>(null);
   const [calls, setCalls] = React.useState<CallRow[] | null>(null);
   const [launching, setLaunching] = React.useState(false);
+  // Lazily seeded from localStorage so the "resuming" state is already
+  // correct on the very first render (avoids a synchronous setState call
+  // inside the rehydrate effect below).
+  const [resuming, setResuming] = React.useState(
+    () => loadActiveCampaign(PAGE_KEY) !== null,
+  );
+
+  // On mount, try to rehydrate the last active campaign for this page so a
+  // refresh restores the dashboard instead of resetting to a blank state.
+  React.useEffect(() => {
+    const stored = loadActiveCampaign(PAGE_KEY);
+    if (!stored) {
+      return;
+    }
+    let cancelled = false;
+    api
+      .getCampaign(stored.campaignId)
+      .then((response) => {
+        if (cancelled) return;
+        const resultSchema = response.campaign.result_schema ?? stored.resultSchema;
+        setAgent({
+          campaignId: response.campaign.id,
+          agentId: response.campaign.agent_id ?? "",
+          resultSchema,
+        });
+        setCalls(
+          response.calls.map((row) => ({
+            id: row.id ?? "",
+            callee_name: row.callee_name ?? null,
+            mobile_number: row.mobile_number,
+            status: row.status ?? null,
+            lifecycle_status: row.lifecycle_status ?? null,
+            engagement_status: row.engagement_status ?? null,
+            answered_by: row.answered_by ?? null,
+            duration_seconds: row.duration_seconds ?? null,
+            recording_url: row.recording_url ?? null,
+            result: row.result ?? null,
+          })),
+        );
+      })
+      .catch(() => {
+        // Campaign no longer exists server-side — drop the stale pointer
+        // and fall back to a fresh, empty state rather than crashing.
+        clearActiveCampaign(PAGE_KEY);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setResuming(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleStartOver = React.useCallback(() => {
+    clearActiveCampaign(PAGE_KEY);
+    setAgent(null);
+    setCalls(null);
+    setSelected([]);
+  }, []);
 
   const handleSelectionChange = React.useCallback(
     (candidates: Candidate[], jd: string, opts: CandidateSearchOptions) => {
@@ -70,6 +138,7 @@ export default function PeopleReachoutPage() {
           resultSchema: DEFAULT_RESULT_SCHEMA,
         };
         setAgent(currentAgent);
+        saveActiveCampaign(PAGE_KEY, currentAgent.campaignId, currentAgent.resultSchema);
         toast.success("Voice agent created", {
           description: `Campaign #${currentAgent.campaignId} is ready for candidates.`,
         });
@@ -93,6 +162,7 @@ export default function PeopleReachoutPage() {
         status: row.status ?? "SCHEDULED",
       }));
       setCalls(seeded);
+      saveActiveCampaign(PAGE_KEY, currentAgent.campaignId, currentAgent.resultSchema);
       toast.success("Calls launched", {
         description: `${seeded.length} candidate${seeded.length === 1 ? "" : "s"} queued for calling.`,
       });
@@ -123,6 +193,18 @@ export default function PeopleReachoutPage() {
           Back
         </Link>
         <div className="flex items-center gap-3">
+          {agent ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleStartOver}
+              className="gap-1.5 text-muted-foreground"
+            >
+              <RotateCcw className="size-4" />
+              Start over
+            </Button>
+          ) : null}
           <TourButton page="people-reachout" />
           <Badge variant="outline" className="hidden sm:inline-flex">
             Built on Hunar
@@ -144,6 +226,13 @@ export default function PeopleReachoutPage() {
             screening agent and live results dashboard as the Hiring Assistant.
           </p>
         </section>
+
+        {resuming ? (
+          <div className="flex items-center gap-2 rounded-lg border border-dashed px-4 py-3 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            Resuming your last session…
+          </div>
+        ) : null}
 
         <CandidateSearch onSelectionChange={handleSelectionChange} />
 

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.db import init_db
-from app.routers import agents, attendance, calls, search, stream, webhooks
+from app.routers import agents, attendance, calls, campaigns, search, stream, webhooks
 from app.services.reconciler import reconciler_loop
 
 app = FastAPI(title="AI Hiring Suite")
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(webhooks.router)
 app.include_router(stream.router)
 app.include_router(agents.router)
+app.include_router(campaigns.router)
 app.include_router(calls.router)
 app.include_router(search.router)
 app.include_router(attendance.router)
