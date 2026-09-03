@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { TourButton } from "@/components/tour-button";
 
 const sections = [
   {
@@ -24,6 +25,7 @@ const sections = [
     description:
       "Spin up a voice agent from a job description and let it screen candidates end-to-end — no dialer, no script writing.",
     tag: "Voice screening",
+    tourId: "card-hiring",
   },
   {
     href: "/people-reachout",
@@ -32,6 +34,7 @@ const sections = [
     description:
       "Search and shortlist candidates by role, then launch bulk outbound calls tracked live in one campaign view.",
     tag: "Sourcing & outreach",
+    tourId: "card-reachout",
   },
   {
     href: "/attendance",
@@ -40,6 +43,7 @@ const sections = [
     description:
       "Automated voice check-ins that confirm availability and attendance, with results streamed back in real time.",
     tag: "Ops automation",
+    tourId: "card-attendance",
   },
 ] as const;
 
@@ -61,9 +65,12 @@ export default function Home() {
             AI Hiring Suite
           </span>
         </div>
-        <Badge variant="outline" className="hidden sm:inline-flex">
-          Built on Hunar
-        </Badge>
+        <div className="flex items-center gap-3">
+          <TourButton page="landing" />
+          <Badge variant="outline" className="hidden sm:inline-flex">
+            Built on Hunar
+          </Badge>
+        </div>
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-6">
@@ -103,9 +110,12 @@ export default function Home() {
         </section>
 
         <section className="grid gap-5 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-          {sections.map(({ href, icon: Icon, title, description, tag }) => (
+          {sections.map(({ href, icon: Icon, title, description, tag, tourId }) => (
             <Link key={href} href={href} className="group">
-              <Card className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30">
+              <Card
+                data-tour={tourId}
+                className="h-full transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30"
+              >
                 <CardHeader>
                   <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
                     <Icon className="size-5" />

@@ -170,7 +170,7 @@ export function CandidateSearch({ onSelectionChange }: CandidateSearchProps) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5" data-tour="search-jd">
               <Label htmlFor="search-jd">Job description</Label>
               <Textarea
                 id="search-jd"
@@ -225,7 +225,7 @@ export function CandidateSearch({ onSelectionChange }: CandidateSearchProps) {
             </div>
           </CardContent>
           <CardFooter className="justify-end gap-2 border-t px-6 py-4">
-            <Button type="submit" disabled={!canSearch}>
+            <Button type="submit" data-tour="find-candidates" disabled={!canSearch}>
               {searching ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
@@ -238,7 +238,7 @@ export function CandidateSearch({ onSelectionChange }: CandidateSearchProps) {
       </Card>
 
       {results.length > 0 ? (
-        <Card>
+        <Card data-tour="candidate-results">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="size-4 text-primary" />

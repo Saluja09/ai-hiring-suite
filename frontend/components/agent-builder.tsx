@@ -225,7 +225,7 @@ export function AgentBuilder({ onAgentBuilt }: AgentBuilderProps) {
               Agent ready
             </Badge>
           ) : (
-            <Button type="submit" disabled={!canSubmit}>
+            <Button type="submit" data-tour="create-agent" disabled={!canSubmit}>
               {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
               Build agent
             </Button>

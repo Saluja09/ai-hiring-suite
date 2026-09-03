@@ -13,6 +13,7 @@ import {
 import { ResultsTable, type CallRow } from "@/components/results-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TourButton } from "@/components/tour-button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, type CandidateInput } from "@/lib/api";
 import { DEFAULT_RESULT_SCHEMA, buildAgentCreateRequest } from "@/lib/build-agent";
@@ -121,9 +122,12 @@ export default function PeopleReachoutPage() {
           <ArrowLeft className="size-4" />
           Back
         </Link>
-        <Badge variant="outline" className="hidden sm:inline-flex">
-          Built on Hunar
-        </Badge>
+        <div className="flex items-center gap-3">
+          <TourButton page="people-reachout" />
+          <Badge variant="outline" className="hidden sm:inline-flex">
+            Built on Hunar
+          </Badge>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 pb-24">
@@ -162,7 +166,12 @@ export default function PeopleReachoutPage() {
               <Badge variant="outline" className="font-normal">
                 {selected.length} candidate{selected.length === 1 ? "" : "s"} shortlisted
               </Badge>
-              <Button type="button" onClick={handleCallSelected} disabled={!canCall}>
+              <Button
+                type="button"
+                data-tour="call-selected"
+                onClick={handleCallSelected}
+                disabled={!canCall}
+              >
                 {launching ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
@@ -175,11 +184,13 @@ export default function PeopleReachoutPage() {
         ) : null}
 
         {agent && calls ? (
-          <ResultsTable
-            campaignId={agent.campaignId}
-            resultSchema={agent.resultSchema}
-            initialCalls={calls}
-          />
+          <div data-tour="reachout-results">
+            <ResultsTable
+              campaignId={agent.campaignId}
+              resultSchema={agent.resultSchema}
+              initialCalls={calls}
+            />
+          </div>
         ) : null}
       </main>
     </div>

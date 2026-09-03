@@ -9,6 +9,7 @@ import { AgentBuilder, type AgentBuiltResult } from "@/components/agent-builder"
 import { CandidateInput } from "@/components/candidate-input";
 import { ResultsTable, type CallRow } from "@/components/results-table";
 import { Badge } from "@/components/ui/badge";
+import { TourButton } from "@/components/tour-button";
 import { cn } from "@/lib/utils";
 import { api, type CandidateInput as ApiCandidateInput } from "@/lib/api";
 
@@ -128,9 +129,12 @@ export default function HiringAssistantPage() {
           <ArrowLeft className="size-4" />
           Back
         </Link>
-        <Badge variant="outline" className="hidden sm:inline-flex">
-          Built on Hunar
-        </Badge>
+        <div className="flex items-center gap-3">
+          <TourButton page="hiring-assistant" />
+          <Badge variant="outline" className="hidden sm:inline-flex">
+            Built on Hunar
+          </Badge>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 pb-24">
@@ -149,18 +153,24 @@ export default function HiringAssistantPage() {
 
         <Stepper current={step} />
 
-        <AgentBuilder onAgentBuilt={handleAgentBuilt} />
+        <div data-tour="agent-form">
+          <AgentBuilder onAgentBuilt={handleAgentBuilt} />
+        </div>
 
         {agent ? (
-          <CandidateInput onLaunch={handleLaunch} launching={launching} />
+          <div data-tour="candidates">
+            <CandidateInput onLaunch={handleLaunch} launching={launching} />
+          </div>
         ) : null}
 
         {agent && calls ? (
-          <ResultsTable
-            campaignId={agent.campaignId}
-            resultSchema={agent.resultSchema}
-            initialCalls={calls}
-          />
+          <div data-tour="results">
+            <ResultsTable
+              campaignId={agent.campaignId}
+              resultSchema={agent.resultSchema}
+              initialCalls={calls}
+            />
+          </div>
         ) : null}
       </main>
     </div>

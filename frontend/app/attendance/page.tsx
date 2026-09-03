@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TourButton } from "@/components/tour-button";
 import { api } from "@/lib/api";
 import { LANGUAGES, PERSONAS } from "@/lib/build-agent";
 import type { VoiceLanguage, VoicePersona } from "@/lib/api";
@@ -141,13 +142,16 @@ export default function AttendancePage() {
           <ArrowLeft className="size-4" />
           Back
         </Link>
-        <Badge variant="outline" className="hidden sm:inline-flex">
-          Built on Hunar
-        </Badge>
+        <div className="flex items-center gap-3">
+          <TourButton page="attendance" />
+          <Badge variant="outline" className="hidden sm:inline-flex">
+            Built on Hunar
+          </Badge>
+        </div>
       </header>
 
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-10 px-6 pb-24">
-        <section className="flex flex-col gap-3">
+        <section className="flex flex-col gap-3" data-tour="strategy">
           <div className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
             <CalendarCheck className="size-5" />
           </div>
@@ -320,7 +324,7 @@ export default function AttendancePage() {
           </p>
         </section>
 
-        <Card>
+        <Card data-tour="rollcall-form">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <PhoneCall className="size-4 text-primary" />
@@ -408,7 +412,12 @@ export default function AttendancePage() {
             <Badge variant="outline" className="font-normal">
               {workerNames.length} worker{workerNames.length === 1 ? "" : "s"} rostered
             </Badge>
-            <Button type="button" onClick={handleRunRollcall} disabled={!canSubmit}>
+            <Button
+              type="button"
+              data-tour="run-rollcall"
+              onClick={handleRunRollcall}
+              disabled={!canSubmit}
+            >
               {launching ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
@@ -420,11 +429,13 @@ export default function AttendancePage() {
         </Card>
 
         {result ? (
-          <ResultsTable
-            campaignId={result.campaignId}
-            resultSchema={ATTENDANCE_RESULT_SCHEMA}
-            initialCalls={[result.call]}
-          />
+          <div data-tour="attendance-results">
+            <ResultsTable
+              campaignId={result.campaignId}
+              resultSchema={ATTENDANCE_RESULT_SCHEMA}
+              initialCalls={[result.call]}
+            />
+          </div>
         ) : null}
       </main>
     </div>

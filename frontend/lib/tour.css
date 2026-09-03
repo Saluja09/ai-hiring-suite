@@ -1,0 +1,203 @@
+/**
+ * Theme overrides for driver.js so the guided-tour popover matches the app's
+ * indigo/slate aesthetic instead of driver.js's default black-and-white
+ * theme. Kept intentionally light — we only touch color, radius, and
+ * typography, not layout.
+ */
+
+.driver-popover.ai-hiring-tour-popover {
+  background-color: oklch(1 0 0);
+  color: oklch(0.21 0.012 264);
+  border: 1px solid oklch(0.914 0.006 264);
+  border-radius: 0.625rem;
+  box-shadow:
+    0 12px 32px -8px oklch(0.21 0.012 264 / 0.18),
+    0 2px 8px -2px oklch(0.21 0.012 264 / 0.1);
+  padding: 1rem 1.1rem;
+  font-family: inherit;
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: oklch(0.21 0.012 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-description {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: oklch(0.5 0.02 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-progress-text {
+  font-size: 0.75rem;
+  color: oklch(0.5 0.02 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-close-btn {
+  color: oklch(0.5 0.02 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-close-btn:hover {
+  color: oklch(0.21 0.012 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-footer button {
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  text-shadow: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn {
+  background-color: oklch(0.47 0.2 279);
+  color: oklch(0.98 0.005 264);
+  border: 1px solid oklch(0.47 0.2 279);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn:hover {
+  background-color: oklch(0.42 0.2 279);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn {
+  background-color: oklch(1 0 0);
+  color: oklch(0.21 0.012 264);
+  border: 1px solid oklch(0.914 0.006 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn:hover {
+  background-color: oklch(0.967 0.003 264);
+}
+
+.driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: oklch(1 0 0);
+}
+.driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: oklch(1 0 0);
+}
+.driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: oklch(1 0 0);
+}
+.driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: oklch(1 0 0);
+}
+
+.driver-active-element {
+  border-radius: 0.625rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .driver-popover.ai-hiring-tour-popover {
+    background-color: oklch(0.2 0.012 264);
+    color: oklch(0.96 0.004 264);
+    border-color: oklch(1 0 0 / 10%);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-title {
+    color: oklch(0.96 0.004 264);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-description,
+  .driver-popover.ai-hiring-tour-popover .driver-popover-progress-text,
+  .driver-popover.ai-hiring-tour-popover .driver-popover-close-btn {
+    color: oklch(0.66 0.015 264);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-close-btn:hover {
+    color: oklch(0.96 0.004 264);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn {
+    background-color: oklch(0.72 0.16 279);
+    color: oklch(0.16 0.02 279);
+    border-color: oklch(0.72 0.16 279);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn:hover {
+    background-color: oklch(0.78 0.16 279);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn {
+    background-color: oklch(0.2 0.012 264);
+    color: oklch(0.96 0.004 264);
+    border-color: oklch(1 0 0 / 10%);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn:hover {
+    background-color: oklch(0.27 0.014 264);
+  }
+
+  .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: oklch(0.2 0.012 264);
+  }
+  .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: oklch(0.2 0.012 264);
+  }
+  .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: oklch(0.2 0.012 264);
+  }
+  .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: oklch(0.2 0.012 264);
+  }
+}
+
+/*
+ * The app's dark mode is controlled by a `.dark` class on <html> (see
+ * ThemeProvider attribute="class"), not just the OS preference, so mirror
+ * the same overrides keyed off that class to stay in sync with manual
+ * theme toggles instead of only the system setting.
+ */
+:root.dark .driver-popover.ai-hiring-tour-popover {
+  background-color: oklch(0.2 0.012 264);
+  color: oklch(0.96 0.004 264);
+  border-color: oklch(1 0 0 / 10%);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-title {
+  color: oklch(0.96 0.004 264);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-description,
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-progress-text,
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-close-btn {
+  color: oklch(0.66 0.015 264);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-close-btn:hover {
+  color: oklch(0.96 0.004 264);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn {
+  background-color: oklch(0.72 0.16 279);
+  color: oklch(0.16 0.02 279);
+  border-color: oklch(0.72 0.16 279);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-next-btn:hover {
+  background-color: oklch(0.78 0.16 279);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn {
+  background-color: oklch(0.2 0.012 264);
+  color: oklch(0.96 0.004 264);
+  border-color: oklch(1 0 0 / 10%);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-footer .driver-popover-prev-btn:hover {
+  background-color: oklch(0.27 0.014 264);
+}
+
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: oklch(0.2 0.012 264);
+}
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: oklch(0.2 0.012 264);
+}
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: oklch(0.2 0.012 264);
+}
+:root.dark .driver-popover.ai-hiring-tour-popover .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: oklch(0.2 0.012 264);
+}

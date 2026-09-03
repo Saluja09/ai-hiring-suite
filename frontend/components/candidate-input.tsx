@@ -308,7 +308,12 @@ export function CandidateInput({ onLaunch, launching = false }: CandidateInputPr
         <Badge variant="outline" className="font-normal">
           {rows.length} candidate{rows.length === 1 ? "" : "s"}
         </Badge>
-        <Button type="button" onClick={handleLaunch} disabled={rows.length === 0 || launching}>
+        <Button
+          type="button"
+          data-tour="launch-calls"
+          onClick={handleLaunch}
+          disabled={rows.length === 0 || launching}
+        >
           {launching ? <Loader2 className="size-4 animate-spin" /> : <Rocket className="size-4" />}
           Start calls
         </Button>
