@@ -18,7 +18,7 @@
 import "driver.js/dist/driver.css";
 import "./tour.css";
 
-import { driver, type Config, type DriveStep } from "driver.js";
+import { driver, type Config, type Driver, type DriveStep } from "driver.js";
 
 export type TourPage =
   | "landing"
@@ -295,11 +295,29 @@ function resolveSteps(steps: DriveStep[]): DriveStep[] {
   });
 }
 
+// Module-level reference to whichever driver.js instance is currently
+// driving a tour (if any), so we never end up with two overlays stacked on
+// top of each other.
+let activeTourDriver: Driver | null = null;
+
+/** Destroys the currently active tour instance, if there is one. */
+function destroyActiveTour(): void {
+  if (activeTourDriver && activeTourDriver.isActive()) {
+    activeTourDriver.destroy();
+  }
+  activeTourDriver = null;
+}
+
 /** Starts (or replays) the guided tour for a given page. */
 export function startTour(page: TourPage): void {
   if (typeof window === "undefined") {
     return;
   }
+
+  // Never stack two tours: close out any tour that's already running before
+  // starting a new one (covers rapid "Take a tour" clicks and replay-while-
+  // active).
+  destroyActiveTour();
 
   const steps = resolveSteps(TOURS[page] ?? []);
   if (steps.length === 0) {
@@ -311,6 +329,7 @@ export function startTour(page: TourPage): void {
     steps,
   });
 
+  activeTourDriver = tourDriver;
   tourDriver.drive();
 }
 
@@ -318,11 +337,21 @@ function seenKey(page: TourPage): string {
   return `${SEEN_KEY_PREFIX}${page}`;
 }
 
+// Tracks the pending auto-start timer (if any) at module scope, so a second
+// invocation of `maybeAutoStartTour` (e.g. React StrictMode's double-invoked
+// dev-mode effect) can see — and callers can cancel — the first one.
+let pendingAutoStartTimer: number | null = null;
+
 /**
  * Starts the tour automatically on a visitor's first visit to `page`, then
  * remembers it was seen so it never auto-starts again on this browser. Safe
  * to call from a `useEffect` on every mount — it's a no-op after the first
  * time. SSR-safe (no-op when `window`/`localStorage` aren't available).
+ *
+ * The `tour-seen-{page}` flag is written synchronously at schedule time
+ * (not after the delay elapses), so a second call made before the timer
+ * fires — e.g. StrictMode's mount→cleanup→remount, or two rapid mounts —
+ * sees the flag already set and does not schedule a second timer.
  */
 export function maybeAutoStartTour(page: TourPage): void {
   if (typeof window === "undefined") {
@@ -343,12 +372,27 @@ export function maybeAutoStartTour(page: TourPage): void {
     return;
   }
 
-  window.setTimeout(() => {
+  try {
+    window.localStorage.setItem(seenKey(page), "1");
+  } catch {
+    // Ignore write failures — worst case the tour auto-starts again.
+  }
+
+  pendingAutoStartTimer = window.setTimeout(() => {
+    pendingAutoStartTimer = null;
     startTour(page);
-    try {
-      window.localStorage.setItem(seenKey(page), "1");
-    } catch {
-      // Ignore write failures — worst case the tour auto-starts again.
-    }
   }, AUTO_START_DELAY_MS);
+}
+
+/**
+ * Cancels a pending auto-start timer, if one is scheduled. Intended to be
+ * returned as a `useEffect` cleanup so StrictMode's dev-mode cleanup (or an
+ * unmount before the delay elapses) cancels the first timer rather than
+ * letting it fire alongside a second one.
+ */
+export function cancelPendingAutoStartTour(): void {
+  if (pendingAutoStartTimer !== null) {
+    window.clearTimeout(pendingAutoStartTimer);
+    pendingAutoStartTimer = null;
+  }
 }

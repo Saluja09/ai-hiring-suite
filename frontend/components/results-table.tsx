@@ -174,28 +174,37 @@ export function ResultsTable({
 }: ResultsTableProps) {
   const [calls, setCalls] = React.useState<CallRow[]>(initialCalls);
 
+  // Merge (never reset) `initialCalls` into `calls` by id: keep existing
+  // rows as-is — they may hold live SSE updates that are fresher than this
+  // snapshot per our backend contract — and only append rows from
+  // initialCalls whose id isn't already present. This keeps a
+  // non-memoized initialCalls prop from a parent re-render from silently
+  // discarding SSE-driven row updates.
+  //
+  // This is done during render (the "adjusting state when a prop changes"
+  // pattern: https://react.dev/reference/react/useState#storing-information-from-previous-renders),
+  // not in a useEffect, so it never triggers the extra render/commit that a
+  // synchronous setState-in-effect would cause. `lastInitialCalls` state
+  // tracks the `initialCalls` identity we've already merged so this only
+  // recomputes when the prop actually changes, and setCalls is only called
+  // when the merge actually adds rows.
+  const [lastInitialCalls, setLastInitialCalls] =
+    React.useState(initialCalls);
+  if (lastInitialCalls !== initialCalls) {
+    setLastInitialCalls(initialCalls);
+    const existingIds = new Set(calls.map((call) => call.id));
+    const additions = initialCalls.filter(
+      (call) => !existingIds.has(call.id),
+    );
+    if (additions.length > 0) {
+      setCalls([...calls, ...additions]);
+    }
+  }
+
   const schemaKeys = React.useMemo(
     () => Object.keys(resultSchema ?? {}),
     [resultSchema],
   );
-
-  React.useEffect(() => {
-    // Merge (never reset): keep existing rows as-is — they may hold live
-    // SSE updates that are fresher than this snapshot per our backend
-    // contract — and only append rows from initialCalls whose id isn't
-    // already present. This keeps a non-memoized initialCalls prop from a
-    // parent re-render from silently discarding SSE-driven row updates.
-    setCalls((prev) => {
-      const existingIds = new Set(prev.map((call) => call.id));
-      const additions = initialCalls.filter(
-        (call) => !existingIds.has(call.id),
-      );
-      if (additions.length === 0) {
-        return prev;
-      }
-      return [...prev, ...additions];
-    });
-  }, [initialCalls]);
 
   React.useEffect(() => {
     if (campaignId === undefined || campaignId === null) {

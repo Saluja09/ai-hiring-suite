@@ -4,7 +4,12 @@ import * as React from "react";
 import { Compass } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { maybeAutoStartTour, startTour, type TourPage } from "@/lib/tour";
+import {
+  cancelPendingAutoStartTour,
+  maybeAutoStartTour,
+  startTour,
+  type TourPage,
+} from "@/lib/tour";
 
 export interface TourButtonProps {
   page: TourPage;
@@ -18,6 +23,12 @@ export interface TourButtonProps {
 export function TourButton({ page }: TourButtonProps) {
   React.useEffect(() => {
     maybeAutoStartTour(page);
+    // Cancel any pending auto-start timer on cleanup so React StrictMode's
+    // dev-mode mount→cleanup→remount cycle cancels the first timer instead
+    // of letting two timers race and start two tours.
+    return () => {
+      cancelPendingAutoStartTour();
+    };
   }, [page]);
 
   return (
