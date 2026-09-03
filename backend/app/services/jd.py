@@ -61,14 +61,17 @@ def _extract_role(jd: str) -> str:
         return "the role"
 
     # Strip common lead-ins like "Hiring "
-    cleaned = re.sub(r"^(hiring|looking for|we need)\s+", "", first_line, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^(hiring|looking for|we need|need|seeking)\s+", "", first_line, flags=re.IGNORECASE)
 
-    # Cut at " in <Location>" if present.
-    match = re.search(r"\bin\s+[A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*", cleaned)
+    # Cut at a location/qualifier clause introduced by " in / at / for / with "
+    # (case-insensitive, so lowercase "in san francisco" is stripped too).
+    match = re.search(r"\b(in|at|for|with)\b", cleaned, flags=re.IGNORECASE)
     if match:
         cleaned = cleaned[: match.start()].strip()
 
-    cleaned = cleaned.rstrip(".").strip()
+    # Drop trailing filler words that hurt an exact title match.
+    cleaned = re.sub(r"\b(needed|required|wanted|staff|role|position)\b\s*$", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = cleaned.rstrip(",.").strip()
     return cleaned or "the role"
 
 
@@ -81,10 +84,15 @@ def _extract_locations(jd: str) -> list[str]:
             if city not in locations:
                 locations.append(city)
 
-    # "in <CapitalizedWord(s)>" pattern, for locations not in known list.
-    for match in re.finditer(r"\bin\s+([A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*)", jd):
-        candidate = match.group(1).strip().rstrip(".")
-        if candidate and candidate not in locations:
+    # "in <place>" pattern (case-insensitive), for locations not in the known
+    # list — e.g. "in san francisco". Take up to 3 words after "in", stopping
+    # at punctuation, and skip if it's obviously not a place.
+    for match in re.finditer(
+        r"\bin\s+([a-zA-Z]+(?:\s+[a-zA-Z]+){0,2})", jd, flags=re.IGNORECASE
+    ):
+        candidate = match.group(1).strip().rstrip(".,")
+        # Avoid capturing trailing skill/qualifier phrases as a "location".
+        if candidate and candidate.lower() not in {loc.lower() for loc in locations}:
             locations.append(candidate)
 
     return locations
