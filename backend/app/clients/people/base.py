@@ -19,6 +19,10 @@ class PersonResult:
     location: str
     phone: str
     linkedin: Optional[str] = None
+    source: str = "mock"
+    # True when `phone` is a demo substitute (e.g. real PDL profile whose
+    # actual number is masked on the free tier) rather than a real number.
+    phone_is_demo: bool = False
 
 
 class PeopleProvider(Protocol):
@@ -57,5 +61,11 @@ def get_provider(settings) -> PeopleProvider:
 
     mock = MockProvider()
     if getattr(settings, "pdl_api_key", ""):
-        return PDLWithMockFallback(PDLProvider(settings.pdl_api_key), mock)
+        demo_phone = getattr(settings, "pdl_demo_phone", "") or None
+        pdl = (
+            PDLProvider(settings.pdl_api_key, demo_phone)
+            if demo_phone
+            else PDLProvider(settings.pdl_api_key)
+        )
+        return PDLWithMockFallback(pdl, mock)
     return mock

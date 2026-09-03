@@ -120,6 +120,11 @@ export interface SearchResult {
   location: string;
   phone: string;
   linkedin?: string | null;
+  /** "mock" (sample dataset) or "pdl" (real People Data Labs profile). */
+  source?: string;
+  /** True when `phone` is a demo substitute (e.g. a real PDL profile whose
+   * actual number is masked on the free tier) rather than a real number. */
+  phone_is_demo?: boolean;
 }
 
 // ---------------------------------------------------------------------------

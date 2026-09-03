@@ -290,8 +290,18 @@ export function CandidateSearch({ onSelectionChange }: CandidateSearchProps) {
                         <span className="flex items-center gap-1">
                           <Phone className="size-3.5 shrink-0" />
                           {candidate.phone}
+                          {candidate.phone_is_demo ? (
+                            <span className="text-[11px] italic opacity-70">
+                              (demo number)
+                            </span>
+                          ) : null}
                         </span>
                       ) : null}
+                      <span className="text-[11px] uppercase tracking-wide opacity-60">
+                        {candidate.source === "pdl"
+                          ? "Real profile · People Data Labs"
+                          : "Sample data"}
+                      </span>
                     </div>
                   </label>
                 );

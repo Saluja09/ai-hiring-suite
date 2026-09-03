@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     gemini_api_key: str = ""
     pdl_api_key: str = ""
+    pdl_demo_phone: str = "+918837518407"
     database_url: str = "sqlite:///./app.db"
     cors_origins: str = "*"
     reconciler_interval_seconds: int = 30
